@@ -29,9 +29,31 @@ Desde la raíz del proyecto:
 ./run-tests.sh
 ```
 
-## Resultado
+Resultado esperado inicial:
 
-Todos los tests pasan correctamente:
+```text
+PASS valid SELECT without WHERE
+PASS unknown projection column
+FAIL TODO WHERE AST and trace -> WHERE válido no debe producir errores: SYNTACTIC_EXPECTED_WHERE_OPERAND|1:41|Soporte WHERE pendiente: implemente el AST de condiciones.
+
+FAIL TODO WHERE unknown column diagnostic -> Debe reportar SEMANTIC_UNKNOWN_WHERE_COLUMN
+FAIL TODO WHERE type mismatch diagnostic -> Debe reportar SEMANTIC_TYPE_MISMATCH
+PASS TODO WHERE missing operand diagnostic
+Passed: 3 Failed: 3
+```
+
+Ese resultado significa que el proyecto base **compila y está listo para usar**. Los 3 fallos son esperados porque corresponden al módulo `WHERE` que debés implementar.
+
+## Restricciones
+
+- Mantener Java 8.
+- No agregar librerías externas.
+- No modificar los tests para ocultar fallos.
+- Implementar la solución dentro de `src/`.
+
+## Entrega
+
+Los 6 tests pasan correctamente con la implementación de WHERE:
 
 ```text
 PASS valid SELECT without WHERE
@@ -43,11 +65,4 @@ PASS TODO WHERE missing operand diagnostic
 Passed: 6 Failed: 0
 ```
 
-![Resultado de tests](screenshot.png)
-
-## Restricciones
-
-- Mantener Java 8.
-- No agregar librerías externas.
-- No modificar los tests para ocultar fallos.
-- Implementar la solución dentro de `src/`.
+![Screenshot de tests](screenshot.png)
