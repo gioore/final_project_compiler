@@ -65,4 +65,6 @@ PASS TODO WHERE missing operand diagnostic
 Passed: 6 Failed: 0
 ```
 
+![Screenshot de tests](Screenshot%20de%20los%20test%20en%20Laptop_GersonOrellana.png)
+
 
