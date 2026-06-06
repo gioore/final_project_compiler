@@ -28,7 +28,10 @@ public class SemanticValidator {
                 result.diagnostics.add(new Diagnostic("SEMANTIC_UNKNOWN_COLUMN", "Columna no existe: " + col, new SourceSpan(1, 1)));
             }
         }
-        // Validacion semantica del WHERE
+        // TODO SERIE 2: validar WHERE
+        // - SEMANTIC_UNKNOWN_WHERE_COLUMN
+        // - SEMANTIC_TYPE_MISMATCH
+        // - TRACE|WHERE_TYPE_CHECK|<line>:<column>|<column>|<operator>|<literalType>
         if (ast.where != null) {
             for (int i = 0; i < ast.where.conditions.size(); i++) {
                 WhereCondition cond = ast.where.conditions.get(i);

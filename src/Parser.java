@@ -16,7 +16,8 @@ public class Parser {
         Token table = expect(TokenType.IDENTIFIER, "SYNTACTIC_EXPECTED_TABLE");
         if (table != null) statement.table = table.lexeme;
 
-        // Parseo de WHERE (opcional)
+        // TODO SERIE 2: parsear WHERE opcional
+        // WHERE <columna> <operador> <literal> (AND|OR <columna> <operador> <literal>)*
         if (match(TokenType.WHERE)) {
             ConditionChain cadena = new ConditionChain();
             while (true) {
