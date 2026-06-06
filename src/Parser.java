@@ -16,17 +16,74 @@ public class Parser {
         Token table = expect(TokenType.IDENTIFIER, "SYNTACTIC_EXPECTED_TABLE");
         if (table != null) statement.table = table.lexeme;
 
-        // TODO SERIE 2:
-        // Implementar parseo de WHERE opcional:
-        // WHERE <columna> <operador> <literal> (AND|OR <columna> <operador> <literal>)*
-        // Debe llenar statement.where con SourceSpan exactos.
+        // Parseo de WHERE (opcional)
         if (match(TokenType.WHERE)) {
-            Token current = current();
-            result.diagnostics.add(new Diagnostic(
-                "SYNTACTIC_EXPECTED_WHERE_OPERAND",
-                "Soporte WHERE pendiente: implemente el AST de condiciones.",
-                current.span));
-            while (!check(TokenType.EOF) && !check(TokenType.SEMICOLON)) advance();
+            ConditionChain cadena = new ConditionChain();
+            while (true) {
+                // Leer nombre de columna
+                Token columna = expect(TokenType.IDENTIFIER, "SYNTACTIC_EXPECTED_WHERE_COLUMN");
+                if (columna == null) {
+                    while (!check(TokenType.EOF) && !check(TokenType.SEMICOLON)) advance();
+                    break;
+                }
+                SourceSpan spanColumna = columna.span;
+                String nombreColumna = columna.lexeme;
+
+                // Leer operador de comparacion
+                Token operador = current();
+                boolean esOperador = operador.type == TokenType.EQUAL ||
+                    operador.type == TokenType.GREATER ||
+                    operador.type == TokenType.LESS ||
+                    operador.type == TokenType.GREATER_EQUAL ||
+                    operador.type == TokenType.LESS_EQUAL ||
+                    operador.type == TokenType.NOT_EQUAL;
+
+                if (!esOperador) {
+                    result.diagnostics.add(new Diagnostic("SYNTACTIC_EXPECTED_WHERE_OPERATOR",
+                        "Se esperaba un operador de comparacion", current().span));
+                    while (!check(TokenType.EOF) && !check(TokenType.SEMICOLON)) advance();
+                    break;
+                }
+                Token tokOperador = advance();
+                String operadorStr = tokOperador.lexeme;
+                SourceSpan spanOperador = tokOperador.span;
+
+                // Leer literal (numero, string o booleano)
+                Token literal = current();
+                LiteralType tipoLiteral = null;
+                if (literal.type == TokenType.NUMBER) {
+                    tipoLiteral = LiteralType.NUMBER;
+                } else if (literal.type == TokenType.STRING) {
+                    tipoLiteral = LiteralType.STRING;
+                } else if (literal.type == TokenType.TRUE || literal.type == TokenType.FALSE) {
+                    tipoLiteral = LiteralType.BOOLEAN;
+                }
+
+                if (tipoLiteral == null) {
+                    result.diagnostics.add(new Diagnostic("SYNTACTIC_EXPECTED_WHERE_OPERAND",
+                        "Se esperaba un literal despues del operador", current().span));
+                    break;
+                }
+                Token tokLiteral = advance();
+                SourceSpan spanLiteral = tokLiteral.span;
+
+                cadena.conditions.add(new WhereCondition(nombreColumna, operadorStr,
+                    tokLiteral.lexeme, tipoLiteral, spanColumna, spanOperador, spanLiteral));
+
+                // Verificar si hay AND u OR para seguir leyendo condiciones
+                if (match(TokenType.AND)) {
+                    cadena.connectors.add("AND");
+                    continue;
+                }
+                if (match(TokenType.OR)) {
+                    cadena.connectors.add("OR");
+                    continue;
+                }
+                break;
+            }
+            if (cadena.conditions.size() > 0) {
+                statement.where = cadena;
+            }
         }
 
         if (check(TokenType.SEMICOLON)) advance();
@@ -51,7 +108,7 @@ public class Parser {
 
     private Token expect(TokenType type, String code) {
         if (check(type)) return advance();
-        result.diagnostics.add(new Diagnostic(code, "Se esperaba " + type + " y se encontró " + current().type, current().span));
+        result.diagnostics.add(new Diagnostic(code, "Se esperaba " + type + " y se encontro " + current().type, current().span));
         return null;
     }
 
