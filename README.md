@@ -65,4 +65,4 @@ PASS TODO WHERE missing operand diagnostic
 Passed: 6 Failed: 0
 ```
 
-![Screenshot de tests](screenshot.png)
+
